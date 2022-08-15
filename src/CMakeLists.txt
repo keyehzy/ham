@@ -12,7 +12,6 @@ add_library(
   foo.cpp
 
   ham/vec.h
-  vec.cpp
 )
 
 target_include_directories(ham-lib PUBLIC .)
