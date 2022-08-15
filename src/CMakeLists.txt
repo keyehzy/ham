@@ -5,11 +5,11 @@ add_executable(
   main.cpp
 )
 
-target_link_libraries(ham PRIVATE ham-lib)
+target_link_libraries(ham PRIVATE ham-lib lapacke)
 
 add_library(
   ham-lib
-  foo.cpp
+  lattice.cpp
 
   ham/vec.h
 )
