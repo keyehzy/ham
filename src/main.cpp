@@ -2,9 +2,13 @@
 #include <ham/vec.h>
 
 #include <array>
+#include <cassert>
 #include <cmath>
+#include <complex>
 #include <iostream>
 #include <vector>
+
+static int modulo(int a, int b) { return (a % b + b) % b; }
 
 struct Edge {
   int index;
@@ -16,28 +20,40 @@ struct Site {
   Vec2<double> position;
 };
 
-enum Boundary {
-  Closed,
-  Open,
-  Open_x,
-  Open_y,
-};
-
-static int modulo(int a, int b) { return (a % b + b) % b; }
-
 class GrapheneLattice {
+ public:
+  // Kind of periodic boundary conditions. Closed means periodic boundary
+  // condition in both X and Y directions and Open no periodic boundary
+  // condition. Open_x and Open_y are the options where just one of then are
+  // closed/open.
+  enum class Boundary {
+    Closed,
+    Open,
+    Open_x,
+    Open_y,
+  };
+
   static constexpr int unitcell_size = 4;
   static constexpr int nearest_neighbors_size = 3;
 
- public:
   explicit GrapheneLattice(int nx, int ny);
 
-  Matrix<int> adjacency_matrix();
+  int nx() const { return m_nx; }
+  int ny() const { return m_ny; }
+  int orbitals() const { return m_orbitals; }
+  Boundary boundary() const { return m_boundary; }
+  const std::vector<Site>& sites() const { return m_sites; }
+  const std::array<Vec2<double>, 2 * nearest_neighbors_size>& deltas() const {
+    return m_deltas;
+  }
+
   int site_count() const { return m_nx * m_ny; }
   int orbital_count() const { return m_nx * m_ny * m_orbitals; }
 
+  Matrix<int> adjacency_matrix() const;
+
  private:
-  bool is_inside_graph(int x, int y);
+  bool is_inside_graph(int x, int y) const;
   void compute_graph();
 
   int m_nx;
@@ -48,15 +64,15 @@ class GrapheneLattice {
   std::array<Vec2<double>, 2 * nearest_neighbors_size> m_deltas;
 };
 
-bool GrapheneLattice::is_inside_graph(int x, int y) {
+bool GrapheneLattice::is_inside_graph(int x, int y) const {
   switch (m_boundary) {
-    case Open:
+    case Boundary::Open:
       return (x >= 0 && x < m_nx) && (y >= 0 && y < m_ny);
-    case Closed:
+    case Boundary::Closed:
       return 1;
-    case Open_x:
+    case Boundary::Open_x:
       return (x >= 0 && x < m_nx);
-    case Open_y:
+    case Boundary::Open_y:
       return (y >= 0 && x < m_ny);
     default:
       return 0;
@@ -64,7 +80,10 @@ bool GrapheneLattice::is_inside_graph(int x, int y) {
 }
 
 GrapheneLattice::GrapheneLattice(int nx, int ny)
-    : m_nx(nx * unitcell_size), m_ny(ny), m_orbitals(1), m_boundary(Closed) {
+    : m_nx(nx * unitcell_size),
+      m_ny(ny),
+      m_orbitals(1),
+      m_boundary(Boundary::Closed) {
   // Nearest-neighbors vectors for honeycomb lattice with 4-sites in the
   // unitcell
   m_deltas = {
@@ -79,11 +98,11 @@ GrapheneLattice::GrapheneLattice(int nx, int ny)
   // Total number of sites
   m_sites.resize(m_nx * m_ny);
 
-  // Compute graph
+  // Finally compute the graph
   this->compute_graph();
 }
 
-Matrix<int> GrapheneLattice::adjacency_matrix() {
+Matrix<int> GrapheneLattice::adjacency_matrix() const {
   Matrix<int> adj(this->orbital_count(), this->orbital_count());
 
   for (int site_index = 0; site_index < this->site_count(); site_index++) {
@@ -153,13 +172,80 @@ void GrapheneLattice::compute_graph() {
   }
 }
 
-int main(int argc, char** argv) {
-  GrapheneLattice l(2, 2);
-  Matrix<int> adj = l.adjacency_matrix();
+struct TightBindingParameters {
+  double t = 1.0;
+};
 
-  for (int i = 0; i < l.orbital_count(); i++) {
-    for (int j = 0; j < l.orbital_count(); j++) {
-      std::cout << adj(i, j) << " ";
+class GrapheneTightbinding {
+ public:
+  explicit GrapheneTightbinding(int nx, int ny,
+                                TightBindingParameters parameters)
+      : m_lattice(GrapheneLattice(nx, ny)), m_parameters(parameters){};
+
+  Matrix<double> realspace_hamiltonian() const {
+    Matrix<double> h(this->size(), this->size());
+
+    for (int site_index = 0; site_index < m_lattice.site_count();
+         site_index++) {
+      for (int neighbor = 0; neighbor < m_lattice.nearest_neighbors_size;
+           neighbor++) {
+        int neighbor_index =
+            m_lattice.sites()[site_index].neighbors[neighbor].index;
+        for (int orbital_index = 0; orbital_index < m_lattice.orbitals();
+             orbital_index++) {
+          h(site_index * m_lattice.orbitals() + orbital_index,
+            neighbor_index * m_lattice.orbitals() + orbital_index) =
+              m_parameters.t;
+        }
+      }
+    }
+
+    return h;
+  }
+
+  Matrix<std::complex<double>> closed_momentum_hamiltonian(
+      Vec2<double> k) const {
+    assert(m_lattice.boundary() == GrapheneLattice::Boundary::Closed);
+
+    Matrix<std::complex<double>> h(this->size(), this->size());
+
+    for (int site_index = 0; site_index < m_lattice.site_count();
+         site_index++) {
+      for (int neighbor = 0; neighbor < m_lattice.nearest_neighbors_size;
+           neighbor++) {
+        Edge neighbor_edge = m_lattice.sites()[site_index].neighbors[neighbor];
+        Vec2<double> delta = m_lattice.deltas()[neighbor_edge.direction];
+        for (int orbital_index = 0; orbital_index < m_lattice.orbitals();
+             orbital_index++) {
+          double phase = k.dot(delta);
+          h(site_index * m_lattice.orbitals() + orbital_index,
+            neighbor_edge.index * m_lattice.orbitals() + orbital_index) +=
+              m_parameters.t *
+              std::exp(-std::complex<double>{0.0, 1.0} * phase);
+        }
+      }
+    }
+
+    return h;
+  }
+
+  int size() const { return m_lattice.orbital_count(); }
+
+ private:
+  GrapheneLattice m_lattice;
+  TightBindingParameters m_parameters;
+};
+
+int main(int argc, char** argv) {
+  TightBindingParameters p;
+  GrapheneTightbinding tb(1, 1, p);
+
+  Matrix<std::complex<double>> h =
+      tb.closed_momentum_hamiltonian(Vec2<double>{1.5, 2.0});
+
+  for (std::size_t i = 0; i < h.rows(); i++) {
+    for (std::size_t j = 0; j < h.cols(); j++) {
+      std::cout << h(i, j) << " ";
     }
     std::cout << '\n';
   }
