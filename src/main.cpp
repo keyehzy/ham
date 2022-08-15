@@ -33,7 +33,8 @@ class GrapheneLattice {
   explicit GrapheneLattice(int nx, int ny);
 
   Matrix<int> adjacency_matrix();
-  int size() const { return m_total; }
+  int site_count() const { return m_nx * m_ny; }
+  int orbital_count() const { return m_nx * m_ny * m_orbitals; }
 
  private:
   bool is_inside_graph(int x, int y);
@@ -41,7 +42,7 @@ class GrapheneLattice {
 
   int m_nx;
   int m_ny;
-  int m_total;
+  int m_orbitals;
   Boundary m_boundary;
   std::vector<Site> m_sites;
   std::array<Vec2<double>, 2 * nearest_neighbors_size> m_deltas;
@@ -57,14 +58,13 @@ bool GrapheneLattice::is_inside_graph(int x, int y) {
       return (x >= 0 && x < m_nx);
     case Open_y:
       return (y >= 0 && x < m_ny);
+    default:
+      return 0;
   }
 }
 
 GrapheneLattice::GrapheneLattice(int nx, int ny)
-    : m_nx(nx * unitcell_size),
-      m_ny(ny),
-      m_total(nx * unitcell_size * ny),
-      m_boundary(Closed) {
+    : m_nx(nx * unitcell_size), m_ny(ny), m_orbitals(1), m_boundary(Closed) {
   // Nearest-neighbors vectors for honeycomb lattice with 4-sites in the
   // unitcell
   m_deltas = {
@@ -84,13 +84,18 @@ GrapheneLattice::GrapheneLattice(int nx, int ny)
 }
 
 Matrix<int> GrapheneLattice::adjacency_matrix() {
-  Matrix<int> adj(m_total, m_total);
-  for (int site_index = 0; site_index < m_total; site_index++) {
+  Matrix<int> adj(this->orbital_count(), this->orbital_count());
+
+  for (int site_index = 0; site_index < this->site_count(); site_index++) {
     for (int neighbor = 0; neighbor < nearest_neighbors_size; neighbor++) {
       int neighbor_index = m_sites[site_index].neighbors[neighbor].index;
-      adj(site_index, neighbor_index) = 1;
+      for (int orbital_index = 0; orbital_index < m_orbitals; orbital_index++) {
+        adj(site_index * m_orbitals + orbital_index,
+            neighbor_index * m_orbitals + orbital_index) = 1;
+      }
     }
   }
+
   return adj;
 }
 
@@ -152,8 +157,8 @@ int main(int argc, char** argv) {
   GrapheneLattice l(2, 2);
   Matrix<int> adj = l.adjacency_matrix();
 
-  for (int i = 0; i < l.size(); i++) {
-    for (int j = 0; j < l.size(); j++) {
+  for (int i = 0; i < l.orbital_count(); i++) {
+    for (int j = 0; j < l.orbital_count(); j++) {
       std::cout << adj(i, j) << " ";
     }
     std::cout << '\n';
