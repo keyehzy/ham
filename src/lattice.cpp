@@ -169,3 +169,21 @@ Matrix<std::complex<double>> GrapheneTightbinding::momentum_hamiltonian(
         return std::exp(-COMPI * phase);
       });
 }
+
+Matrix<std::complex<double>>
+GrapheneTightbinding::momentum_hamiltonian_x_derivative(Vec2<double> k) const {
+  return this->momentum_hamiltonian_base(
+      k, [](Vec2<double> k, Vec2<double> delta) {
+        double phase = k.dot(delta);
+        return (-COMPI * delta.x) * std::exp(-COMPI * phase);
+      });
+}
+
+Matrix<std::complex<double>>
+GrapheneTightbinding::momentum_hamiltonian_y_derivative(Vec2<double> k) const {
+  return this->momentum_hamiltonian_base(
+      k, [](Vec2<double> k, Vec2<double> delta) {
+        double phase = k.dot(delta);
+        return (-COMPI * delta.y) * std::exp(-COMPI * phase);
+      });
+}

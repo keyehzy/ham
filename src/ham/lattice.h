@@ -79,10 +79,15 @@ class GrapheneTightbinding {
   using FactorFn =
       std::function<std::complex<double>(Vec2<double>, Vec2<double>)>;
 
-  Matrix<std::complex<double>> momentum_hamiltonian_base(
-      Vec2<double> k, FactorFn factor) const;
+  Matrix<std::complex<double>> momentum_hamiltonian_base(Vec2<double> k,
+                                                         FactorFn factor) const;
 
-  Matrix<std::complex<double>> momentum_hamiltonian(
+  Matrix<std::complex<double>> momentum_hamiltonian(Vec2<double> k) const;
+
+  Matrix<std::complex<double>> momentum_hamiltonian_x_derivative(
+      Vec2<double> k) const;
+
+  Matrix<std::complex<double>> momentum_hamiltonian_y_derivative(
       Vec2<double> k) const;
 
   int size() const { return m_lattice.orbital_count(); }
