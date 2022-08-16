@@ -1,4 +1,5 @@
 #include <ham/lattice.h>
+#include <ham/types.h>
 
 #include <array>
 #include <cassert>
@@ -8,7 +9,7 @@
 
 static int modulo(int a, int b) { return (a % b + b) % b; }
 
-static constexpr std::complex<double> COMPI = std::complex<double>{0.0, 1.0};
+static constexpr Complex COMPI = Complex{0.0, 1.0};
 
 bool GrapheneLattice::is_inside_graph(int x, int y) const {
   switch (m_boundary) {
@@ -138,11 +139,11 @@ Matrix<double> GrapheneTightbinding::realspace_hamiltonian() const {
   return h;
 }
 
-Matrix<std::complex<double>> GrapheneTightbinding::momentum_hamiltonian_base(
+Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian_base(
     Vec2<double> k, FactorFn factor) const {
   assert(m_lattice.boundary() == GrapheneLattice::Boundary::Closed);
 
-  Matrix<std::complex<double>> h(this->size(), this->size());
+  Matrix<Complex> h(this->size(), this->size());
 
   for (int site_index = 0; site_index < m_lattice.site_count(); site_index++) {
     for (int neighbor = 0; neighbor < m_lattice.nearest_neighbors_size;
@@ -161,7 +162,7 @@ Matrix<std::complex<double>> GrapheneTightbinding::momentum_hamiltonian_base(
   return h;
 }
 
-Matrix<std::complex<double>> GrapheneTightbinding::momentum_hamiltonian(
+Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian(
     Vec2<double> k) const {
   return this->momentum_hamiltonian_base(
       k, [](Vec2<double> k, Vec2<double> delta) {
@@ -170,8 +171,8 @@ Matrix<std::complex<double>> GrapheneTightbinding::momentum_hamiltonian(
       });
 }
 
-Matrix<std::complex<double>>
-GrapheneTightbinding::momentum_hamiltonian_x_derivative(Vec2<double> k) const {
+Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian_x_derivative(
+    Vec2<double> k) const {
   return this->momentum_hamiltonian_base(
       k, [](Vec2<double> k, Vec2<double> delta) {
         double phase = k.dot(delta);
@@ -179,8 +180,8 @@ GrapheneTightbinding::momentum_hamiltonian_x_derivative(Vec2<double> k) const {
       });
 }
 
-Matrix<std::complex<double>>
-GrapheneTightbinding::momentum_hamiltonian_y_derivative(Vec2<double> k) const {
+Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian_y_derivative(
+    Vec2<double> k) const {
   return this->momentum_hamiltonian_base(
       k, [](Vec2<double> k, Vec2<double> delta) {
         double phase = k.dot(delta);

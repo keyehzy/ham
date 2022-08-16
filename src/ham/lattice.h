@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ham/matrix.h>
+#include <ham/types.h>
 #include <ham/vec.h>
 
 #include <array>
@@ -76,19 +77,16 @@ class GrapheneTightbinding {
 
   Matrix<double> realspace_hamiltonian() const;
 
-  using FactorFn =
-      std::function<std::complex<double>(Vec2<double>, Vec2<double>)>;
+  using FactorFn = std::function<Complex(Vec2<double>, Vec2<double>)>;
 
-  Matrix<std::complex<double>> momentum_hamiltonian_base(Vec2<double> k,
-                                                         FactorFn factor) const;
+  Matrix<Complex> momentum_hamiltonian_base(Vec2<double> k,
+                                            FactorFn factor) const;
 
-  Matrix<std::complex<double>> momentum_hamiltonian(Vec2<double> k) const;
+  Matrix<Complex> momentum_hamiltonian(Vec2<double> k) const;
 
-  Matrix<std::complex<double>> momentum_hamiltonian_x_derivative(
-      Vec2<double> k) const;
+  Matrix<Complex> momentum_hamiltonian_x_derivative(Vec2<double> k) const;
 
-  Matrix<std::complex<double>> momentum_hamiltonian_y_derivative(
-      Vec2<double> k) const;
+  Matrix<Complex> momentum_hamiltonian_y_derivative(Vec2<double> k) const;
 
   int size() const { return m_lattice.orbital_count(); }
 
