@@ -8,6 +8,8 @@
 
 static int modulo(int a, int b) { return (a % b + b) % b; }
 
+static constexpr std::complex<double> COMPI = std::complex<double>{0.0, 1.0};
+
 bool GrapheneLattice::is_inside_graph(int x, int y) const {
   switch (m_boundary) {
     case Boundary::Open:
@@ -136,8 +138,8 @@ Matrix<double> GrapheneTightbinding::realspace_hamiltonian() const {
   return h;
 }
 
-Matrix<std::complex<double>> GrapheneTightbinding::closed_momentum_hamiltonian(
-    Vec2<double> k) const {
+Matrix<std::complex<double>> GrapheneTightbinding::momentum_hamiltonian_base(
+    Vec2<double> k, FactorFn factor) const {
   assert(m_lattice.boundary() == GrapheneLattice::Boundary::Closed);
 
   Matrix<std::complex<double>> h(this->size(), this->size());
@@ -149,13 +151,21 @@ Matrix<std::complex<double>> GrapheneTightbinding::closed_momentum_hamiltonian(
       Vec2<double> delta = m_lattice.deltas()[neighbor_edge.direction];
       for (int orbital_index = 0; orbital_index < m_lattice.orbitals();
            orbital_index++) {
-        double phase = k.dot(delta);
         h(site_index * m_lattice.orbitals() + orbital_index,
           neighbor_edge.index * m_lattice.orbitals() + orbital_index) +=
-            m_parameters.t * std::exp(-std::complex<double>{0.0, 1.0} * phase);
+            m_parameters.t * factor(k, delta);
       }
     }
   }
 
   return h;
+}
+
+Matrix<std::complex<double>> GrapheneTightbinding::momentum_hamiltonian(
+    Vec2<double> k) const {
+  return this->momentum_hamiltonian_base(
+      k, [](Vec2<double> k, Vec2<double> delta) {
+        double phase = k.dot(delta);
+        return std::exp(-COMPI * phase);
+      });
 }

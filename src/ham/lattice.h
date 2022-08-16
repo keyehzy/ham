@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cmath>
 #include <complex>
+#include <functional>
 #include <vector>
 
 struct Edge {
@@ -75,7 +76,13 @@ class GrapheneTightbinding {
 
   Matrix<double> realspace_hamiltonian() const;
 
-  Matrix<std::complex<double>> closed_momentum_hamiltonian(
+  using FactorFn =
+      std::function<std::complex<double>(Vec2<double>, Vec2<double>)>;
+
+  Matrix<std::complex<double>> momentum_hamiltonian_base(
+      Vec2<double> k, FactorFn factor) const;
+
+  Matrix<std::complex<double>> momentum_hamiltonian(
       Vec2<double> k) const;
 
   int size() const { return m_lattice.orbital_count(); }

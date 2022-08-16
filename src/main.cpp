@@ -15,7 +15,7 @@ void print_bandstructure(const GrapheneTightbinding& tb) {
         (static_cast<double>(j) / static_cast<double>(py-1));
 
       Vec2<double> k{x, y};
-      Matrix<std::complex<double>> h = tb.closed_momentum_hamiltonian(k);
+      Matrix<std::complex<double>> h = tb.momentum_hamiltonian(k);
       Eigensystem s(h);
 
       std::cout << k.x << " " << k.y << " ";
