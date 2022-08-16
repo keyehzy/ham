@@ -11,6 +11,10 @@ add_library(
   ham-lib
   lattice.cpp
 
+  ham/eigensystem.h
+  ham/lattice.h
+  ham/matrix.h
+  ham/types.h
   ham/vec.h
 )
 
