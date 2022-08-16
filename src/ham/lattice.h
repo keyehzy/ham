@@ -11,6 +11,9 @@
 #include <functional>
 #include <vector>
 
+// Edge represent a "hop" between two sites in the graph. We store the index
+// where the site lands and the direction used. direction is a index for looking
+// up in a table of vectors after.
 struct Edge {
   int index;
   int direction;
@@ -23,10 +26,10 @@ struct Site {
 
 class GrapheneLattice {
  public:
-  // Kind of periodic boundary conditions. Closed means periodic boundary
-  // condition in both X and Y directions and Open no periodic boundary
-  // condition. Open_x and Open_y are the options where just one of then are
-  // closed/open.
+  // Kind of periodic boundary conditions:
+  // Closed means periodic boundary condition in both X and Y directions.
+  // Open no periodic boundary condition.
+  // Open_x and Open_y are the options where just one of then are closed/open.
   enum class Boundary {
     Closed,
     Open,
@@ -44,8 +47,19 @@ class GrapheneLattice {
   int orbitals() const { return m_orbitals; }
   Boundary boundary() const { return m_boundary; }
   const std::vector<Site>& sites() const { return m_sites; }
+
+  Site site(int i) const {
+    assert(i >= 0 && i < static_cast<int>(m_sites.size()));
+    return m_sites[i];
+  }
+
   const std::array<Vec2<double>, 2 * nearest_neighbors_size>& deltas() const {
     return m_deltas;
+  }
+
+  Vec2<double> delta(int i) const {
+    assert(i >= 0 && i < 2 * nearest_neighbors_size);
+    return m_deltas[i];
   }
 
   int site_count() const { return m_nx * m_ny; }

@@ -122,6 +122,10 @@ void GrapheneLattice::compute_graph() {
 Matrix<double> GrapheneTightbinding::realspace_hamiltonian() const {
   Matrix<double> h(this->size(), this->size());
 
+  // 1) For each site, go to its neighbors and for each neighbor set a value at
+  // the matrix entry (site_index, neighbor_index).
+  // 2) For multiple orbitals we need to pad the entries.
+
   for (int site_index = 0; site_index < m_lattice.site_count(); site_index++) {
     for (int neighbor = 0; neighbor < m_lattice.nearest_neighbors_size;
          neighbor++) {
@@ -135,21 +139,34 @@ Matrix<double> GrapheneTightbinding::realspace_hamiltonian() const {
       }
     }
   }
-
   return h;
 }
 
 Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian_base(
     Vec2<double> k, FactorFn factor) const {
+  // We can only perform this operation when we have closed periodic boundary
+  // conditions, otherwise we cannot use Bloch theorem a justify using
+  // tightbinding.
   assert(m_lattice.boundary() == GrapheneLattice::Boundary::Closed);
 
   Matrix<Complex> h(this->size(), this->size());
 
+  // Go through each site and check its neighbors, both the indices from which
+  // the electron hop from and to are known as well as the vector used in the
+  // fourier transform. It is important that we sum the matrix entry in case we
+  // have a small unitcell where there are two hopping coming from sites with
+  // same index (for instance wrapping around from the edges). This way we don't
+  // override the previous hopping with the next one.
+
+  // Here we need to make an extra step.
+  // 3) For any nearest-neighbors hamiltonian, pass a function "factor" which
+  // models the hamiltonian.
+
   for (int site_index = 0; site_index < m_lattice.site_count(); site_index++) {
     for (int neighbor = 0; neighbor < m_lattice.nearest_neighbors_size;
          neighbor++) {
-      Edge neighbor_edge = m_lattice.sites()[site_index].neighbors[neighbor];
-      Vec2<double> delta = m_lattice.deltas()[neighbor_edge.direction];
+      Edge neighbor_edge = m_lattice.site(site_index).neighbors[neighbor];
+      Vec2<double> delta = m_lattice.delta(neighbor_edge.direction);
       for (int orbital_index = 0; orbital_index < m_lattice.orbitals();
            orbital_index++) {
         h(site_index * m_lattice.orbitals() + orbital_index,
@@ -158,7 +175,6 @@ Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian_base(
       }
     }
   }
-
   return h;
 }
 
