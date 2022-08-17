@@ -81,14 +81,11 @@ class Matrix {
   T& operator()(std::size_t i, std::size_t j);
   T operator()(std::size_t i, std::size_t j) const;
 
+  T& operator[](std::size_t i);
+  T operator[](std::size_t i) const;
+
   Matrix<T> dot(const Matrix<T>& m) const;
   Vector<T> dot(const Vector<T>& v) const;
-
-  void from(const Matrix& m) {
-    m_cols = m.rows();
-    m_cols = m.cols();
-    m_data = m.data();
-  }
 
  private:
   std::size_t m_rows;
@@ -119,4 +116,14 @@ inline T& Matrix<T>::operator()(std::size_t i, std::size_t j) {
 template <class T>
 inline T Matrix<T>::operator()(std::size_t i, std::size_t j) const {
   return m_data[m_cols * i + j];
+}
+
+template <class T>
+inline T& Matrix<T>::operator[](std::size_t i) {
+  return this->row(i);
+}
+
+template <class T>
+T Matrix<T>::operator[](std::size_t i) const {
+  return this->row(i);
 }

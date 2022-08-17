@@ -27,14 +27,14 @@ class Vector {
 };
 
 template <typename T>
-T Vector<T>::dot(const Vector<T>& v) const {
+inline T Vector<T>::dot(const Vector<T>& v) const {
   assert(m_size == v.size());
   return std::inner_product(m_data.begin(), m_data.end(), v.data().begin(),
                             static_cast<T>(0));
 }
 
 template <typename T>
-T Vector<T>::total() const {
+inline T Vector<T>::total() const {
   return std::accumulate(m_data.begin(), m_data.end(), static_cast<T>(0));
 }
 

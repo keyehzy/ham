@@ -11,7 +11,7 @@ Eigensystem::Eigensystem(const Matrix<Complex>& m) {
   char uplo = 'U';
   lapack_int n = m.rows();
   m_eigenvalues.resize(n);
-  m_eigenvectors.from(m);
+  m_eigenvectors = m;
   int lda = n;
 
   LAPACKE_zheev(matrix_layout, jobz, uplo, n,
