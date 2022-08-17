@@ -30,11 +30,20 @@ void print_bandstructure(const GrapheneTightbinding& tb) {
 }
 
 int main(int argc, char** argv) {
-  TightBindingParameters p;
-  GrapheneTightbinding tb(1, 1, p);
-  print_bandstructure(tb);
+  // TightBindingParameters p;
+  // GrapheneTightbinding tb(1, 1, p);
+  // print_bandstructure(tb);
 
+  // GrapheneLattice gl(1, 1);
+  // Matrix<double> X = gl.position_operator_x();
+  // Matrix<double> Y = gl.position_operator_y();
 
+  // for (int i = 0; i < gl.orbital_count(); i++) {
+  //   for (int j = 0; j < gl.orbital_count(); j++) {
+  //     std::cout << X(i, j) << " ";
+  //   }
+  //   std::cout << '\n';
+  // }
 
   // TightBindingParameters p;
   // GrapheneTightbinding tb(1, 1, p);
