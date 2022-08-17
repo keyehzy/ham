@@ -5,7 +5,7 @@ add_executable(
   main.cpp
 )
 
-target_link_libraries(ham PRIVATE ham-lib openblas)
+target_link_libraries(ham PRIVATE ham-lib openblas lapacke)
 
 add_library(
   ham-lib
@@ -21,3 +21,11 @@ add_library(
 )
 
 target_include_directories(ham-lib PUBLIC .)
+
+find_package(BLAS REQUIRED)
+find_package(LAPACK REQUIRED)
+
+if(BLAS_FOUND)
+  find_path(BLAS_INCLUDE_DIRS cblas.h $ENV{BLAS_HOME}/include)
+  target_include_directories(ham-lib PUBLIC ${BLAS_INCLUDE_DIRS})
+endif(BLAS_FOUND)

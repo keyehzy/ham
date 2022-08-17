@@ -1,6 +1,8 @@
 #include <ham/eigensystem.h>
 #include <ham/types.h>
 
+#include "lapacke.h"
+
 Eigensystem::Eigensystem(const Matrix<Complex>& m) {
   assert(m.rows() == m.cols());
 
