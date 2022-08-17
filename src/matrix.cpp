@@ -62,11 +62,11 @@ Matrix<Complex> Matrix<Complex>::dot(const Matrix<Complex>& m) const {
 }
 
 template <>
-std::vector<double> Matrix<double>::dot(const std::vector<double>& v) const {
+Vector<double> Matrix<double>::dot(const Vector<double>& v) const {
   assert(m_rows == v.size());
 
   // std::cout << "uses blas" << std::endl;
-  std::vector<double> res(m_cols);
+  Vector<double> res(m_cols);
 
   CBLAS_LAYOUT layout = CblasRowMajor;
   CBLAS_TRANSPOSE trans = CblasNoTrans;
@@ -75,7 +75,7 @@ std::vector<double> Matrix<double>::dot(const std::vector<double>& v) const {
   double alpha = static_cast<double>(1);
   const double* A = &(this->data()[0]);
   blasint lda = N;
-  const double* X = &v[0];
+  const double* X = &(v.data()[0]);
   blasint incx = 1;
   double beta = static_cast<double>(0);
   const double* Y = &res[0];
@@ -88,11 +88,11 @@ std::vector<double> Matrix<double>::dot(const std::vector<double>& v) const {
 }
 
 template <>
-std::vector<Complex> Matrix<Complex>::dot(const std::vector<Complex>& v) const {
+Vector<Complex> Matrix<Complex>::dot(const Vector<Complex>& v) const {
   assert(m_rows == v.size());
 
   // std::cout << "uses blas" << std::endl;
-  std::vector<Complex> res(m_cols);
+  Vector<Complex> res(m_cols);
 
   CBLAS_LAYOUT layout = CblasRowMajor;
   CBLAS_TRANSPOSE trans = CblasNoTrans;
@@ -101,7 +101,7 @@ std::vector<Complex> Matrix<Complex>::dot(const std::vector<Complex>& v) const {
   Complex alpha = static_cast<Complex>(1);
   const Complex* A = &(this->data()[0]);
   blasint lda = N;
-  const Complex* X = &v[0];
+  const Complex* X = &(v.data()[0]);
   blasint incx = 1;
   Complex beta = static_cast<Complex>(0);
   const Complex* Y = &res[0];

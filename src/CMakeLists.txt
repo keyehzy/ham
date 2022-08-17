@@ -12,6 +12,7 @@ add_library(
   lattice.cpp
   matrix.cpp
   eigensystem.cpp
+  vector.cpp
 
   ham/eigensystem.h
   ham/lattice.h

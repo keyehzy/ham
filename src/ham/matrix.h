@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ham/vector.h>
+
 #include <cassert>
 #include <cstddef>
 #include <valarray>
@@ -36,8 +38,8 @@ class Slice {
     return it;
   }
 
-  std::vector<T> as_vec() const {
-    std::vector<T> v(m_slice.size());
+  Vector<T> as_vec() const {
+    Vector<T> v(m_slice.size());
     for (std::size_t i = 0; i < m_slice.size(); i++) {
       v[i] = this->ref(i);
     }
@@ -80,7 +82,7 @@ class Matrix {
   T operator()(std::size_t i, std::size_t j) const;
 
   Matrix<T> dot(const Matrix<T>& m) const;
-  std::vector<T> dot(const std::vector<T>& v) const;
+  Vector<T> dot(const Vector<T>& v) const;
 
   void from(const Matrix& m) {
     m_cols = m.rows();

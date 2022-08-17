@@ -14,7 +14,7 @@ class Eigensystem {
 
   double eigenvalue(std::size_t i) const { return m_eigenvalues[i]; }
 
-  std::vector<Complex> eigenvector(std::size_t i) const {
+  Vector<Complex> eigenvector(std::size_t i) const {
     return m_eigenvectors.col(i).as_vec();
   }
 
