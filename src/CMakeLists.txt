@@ -18,6 +18,7 @@ add_library(
   ham/matrix.h
   ham/types.h
   ham/vec.h
+  ham/vector.h
 )
 
 target_include_directories(ham-lib PUBLIC .)
