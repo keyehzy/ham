@@ -21,7 +21,7 @@ struct Edge {
 
 struct Site {
   std::vector<Edge> neighbors;
-  Vec2<double> position;
+  Vec2d position;
 };
 
 class GrapheneLattice {
@@ -48,17 +48,13 @@ class GrapheneLattice {
   Boundary boundary() const { return m_boundary; }
   const std::vector<Site>& sites() const { return m_sites; }
 
-  Site site(std::size_t i) const {
-    return m_sites[i];
-  }
+  Site site(std::size_t i) const { return m_sites[i]; }
 
-  const std::array<Vec2<double>, 2 * nearest_neighbors_size>& deltas() const {
+  const std::array<Vec2d, 2 * nearest_neighbors_size>& deltas() const {
     return m_deltas;
   }
 
-  Vec2<double> delta(std::size_t i) const {
-    return m_deltas[i];
-  }
+  Vec2d delta(std::size_t i) const { return m_deltas[i]; }
 
   int site_count() const { return m_nx * m_ny; }
 
@@ -79,7 +75,7 @@ class GrapheneLattice {
   int m_orbitals;
   Boundary m_boundary;
   std::vector<Site> m_sites;
-  std::array<Vec2<double>, 2 * nearest_neighbors_size> m_deltas;
+  std::array<Vec2d, 2 * nearest_neighbors_size> m_deltas;
 };
 
 struct TightBindingParameters {
@@ -94,16 +90,15 @@ class GrapheneTightbinding {
 
   Matrix<double> realspace_hamiltonian() const;
 
-  using FactorFn = std::function<Complex(Vec2<double>, Vec2<double>)>;
+  using FactorFn = std::function<Complex(Vec2d, Vec2d)>;
 
-  Matrix<Complex> momentum_hamiltonian_base(Vec2<double> k,
-                                            FactorFn factor) const;
+  Matrix<Complex> momentum_hamiltonian_base(Vec2d k, FactorFn factor) const;
 
-  Matrix<Complex> momentum_hamiltonian(Vec2<double> k) const;
+  Matrix<Complex> momentum_hamiltonian(Vec2d k) const;
 
-  Matrix<Complex> momentum_hamiltonian_x_derivative(Vec2<double> k) const;
+  Matrix<Complex> momentum_hamiltonian_x_derivative(Vec2d k) const;
 
-  Matrix<Complex> momentum_hamiltonian_y_derivative(Vec2<double> k) const;
+  Matrix<Complex> momentum_hamiltonian_y_derivative(Vec2d k) const;
 
   int size() const { return m_lattice.orbital_count(); }
 

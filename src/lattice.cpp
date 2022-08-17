@@ -34,12 +34,12 @@ GrapheneLattice::GrapheneLattice(int nx, int ny)
   // Nearest-neighbors vectors for honeycomb lattice with 4-sites in the
   // unitcell
   m_deltas = {
-      Vec2<double>{0.5, 0.5 * std::sqrt(3.0)},
-      Vec2<double>{0.5, -0.5 * std::sqrt(3.0)},
-      Vec2<double>{-1.0, 0.0},
-      Vec2<double>{1.0, 0.0},
-      Vec2<double>{-0.5, 0.5 * std::sqrt(3.0)},
-      Vec2<double>{-0.5, -0.5 * std::sqrt(3.0)},
+      Vec2d{0.5, 0.5 * std::sqrt(3.0)},
+      Vec2d{0.5, -0.5 * std::sqrt(3.0)},
+      Vec2d{-1.0, 0.0},
+      Vec2d{1.0, 0.0},
+      Vec2d{-0.5, 0.5 * std::sqrt(3.0)},
+      Vec2d{-0.5, -0.5 * std::sqrt(3.0)},
   };
 
   // Total number of sites
@@ -90,12 +90,12 @@ void GrapheneLattice::compute_graph() {
 
   // position_walk is an auxilary array used to calculate where the next
   // site will be placed on.
-  const Vec2<double> position_walk[unitcell_size] = {m_deltas[0], m_deltas[3],
-                                                     m_deltas[1], m_deltas[3]};
+  const Vec2d position_walk[unitcell_size] = {m_deltas[0], m_deltas[3],
+                                              m_deltas[1], m_deltas[3]};
 
   for (int j = 0; j < m_ny; j++) {
     // Start from the left-most site
-    Vec2<double> current_position{0.0, static_cast<double>(j) * std::sqrt(3.0)};
+    Vec2d current_position{0.0, static_cast<double>(j) * std::sqrt(3.0)};
 
     for (int i = 0; i < m_nx; i++) {
       int index = j * m_nx + i;
@@ -173,7 +173,7 @@ Matrix<double> GrapheneTightbinding::realspace_hamiltonian() const {
 }
 
 Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian_base(
-    Vec2<double> k, FactorFn factor) const {
+    Vec2d k, FactorFn factor) const {
   // We can only perform this operation when we have closed periodic boundary
   // conditions, otherwise we cannot use Bloch theorem a justify using
   // tightbinding.
@@ -196,7 +196,7 @@ Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian_base(
     for (int neighbor = 0; neighbor < m_lattice.nearest_neighbors_size;
          neighbor++) {
       Edge neighbor_edge = m_lattice.site(site_index).neighbors[neighbor];
-      Vec2<double> delta = m_lattice.delta(neighbor_edge.direction);
+      Vec2d delta = m_lattice.delta(neighbor_edge.direction);
       for (int orbital_index = 0; orbital_index < m_lattice.orbitals();
            orbital_index++) {
         h(site_index * m_lattice.orbitals() + orbital_index,
@@ -208,29 +208,25 @@ Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian_base(
   return h;
 }
 
-Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian(
-    Vec2<double> k) const {
-  return this->momentum_hamiltonian_base(
-      k, [](Vec2<double> k, Vec2<double> delta) {
-        double phase = k.dot(delta);
-        return std::exp(-COMPI * phase);
-      });
+Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian(Vec2d k) const {
+  return this->momentum_hamiltonian_base(k, [](Vec2d k, Vec2d delta) {
+    double phase = k.dot(delta);
+    return std::exp(-COMPI * phase);
+  });
 }
 
 Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian_x_derivative(
-    Vec2<double> k) const {
-  return this->momentum_hamiltonian_base(
-      k, [](Vec2<double> k, Vec2<double> delta) {
-        double phase = k.dot(delta);
-        return (-COMPI * delta.x) * std::exp(-COMPI * phase);
-      });
+    Vec2d k) const {
+  return this->momentum_hamiltonian_base(k, [](Vec2d k, Vec2d delta) {
+    double phase = k.dot(delta);
+    return (-COMPI * delta.x) * std::exp(-COMPI * phase);
+  });
 }
 
 Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian_y_derivative(
-    Vec2<double> k) const {
-  return this->momentum_hamiltonian_base(
-      k, [](Vec2<double> k, Vec2<double> delta) {
-        double phase = k.dot(delta);
-        return (-COMPI * delta.y) * std::exp(-COMPI * phase);
-      });
+    Vec2d k) const {
+  return this->momentum_hamiltonian_base(k, [](Vec2d k, Vec2d delta) {
+    double phase = k.dot(delta);
+    return (-COMPI * delta.y) * std::exp(-COMPI * phase);
+  });
 }
