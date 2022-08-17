@@ -2,6 +2,7 @@
 #include <ham/lattice.h>
 
 #include <iostream>
+#include "ham/geometry.h"
 
 void print_bandstructure(const GrapheneTightbinding& tb) {
   int px = 25, py = 25;

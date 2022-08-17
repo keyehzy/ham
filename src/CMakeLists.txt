@@ -13,6 +13,7 @@ add_library(
   matrix.cpp
   eigensystem.cpp
   vector.cpp
+  geometry.cpp
 
   ham/eigensystem.h
   ham/lattice.h
@@ -20,6 +21,7 @@ add_library(
   ham/types.h
   ham/vec.h
   ham/vector.h
+  ham/geometry.h
 )
 
 target_include_directories(ham-lib PUBLIC .)
