@@ -90,8 +90,7 @@ void GrapheneLattice::compute_graph() {
 
   // position_walk is an auxilary array used to calculate where the next
   // site will be placed on.
-  const Vec2d position_walk[unitcell_size] = {m_deltas[0], m_deltas[3],
-                                              m_deltas[1], m_deltas[3]};
+  constexpr int position_walk[unitcell_size] = {0, 3, 1, 3};
 
   for (int j = 0; j < m_ny; j++) {
     // Start from the left-most site
@@ -102,7 +101,7 @@ void GrapheneLattice::compute_graph() {
       int kind = index % unitcell_size;
 
       m_sites[index].position = current_position;
-      current_position = current_position + position_walk[kind];
+      current_position = current_position + m_deltas[position_walk[kind]];
 
       for (int neighbor = 0; neighbor < nearest_neighbors_size; neighbor++) {
         int dx = graph_walk[kind][neighbor][0];
@@ -159,8 +158,7 @@ Matrix<double> GrapheneTightbinding::realspace_hamiltonian() const {
   for (int site_index = 0; site_index < m_lattice.site_count(); site_index++) {
     for (int neighbor = 0; neighbor < m_lattice.nearest_neighbors_size;
          neighbor++) {
-      int neighbor_index =
-          m_lattice.site(site_index).neighbors[neighbor].index;
+      int neighbor_index = m_lattice.site(site_index).neighbors[neighbor].index;
       for (int orbital_index = 0; orbital_index < m_lattice.orbitals();
            orbital_index++) {
         h(site_index * m_lattice.orbitals() + orbital_index,
