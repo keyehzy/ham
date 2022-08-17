@@ -15,3 +15,6 @@ add_subdirectory(vendor)
 
 include(CTest)
 add_subdirectory(test)
+
+find_package(BLAS REQUIRED)
+find_package(LAPACK REQUIRED)

@@ -5,11 +5,13 @@ add_executable(
   main.cpp
 )
 
-target_link_libraries(ham PRIVATE ham-lib lapacke)
+target_link_libraries(ham PRIVATE ham-lib openblas)
 
 add_library(
   ham-lib
   lattice.cpp
+  matrix.cpp
+  eigensystem.cpp
 
   ham/eigensystem.h
   ham/lattice.h
