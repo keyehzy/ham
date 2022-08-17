@@ -160,7 +160,7 @@ Matrix<double> GrapheneTightbinding::realspace_hamiltonian() const {
     for (int neighbor = 0; neighbor < m_lattice.nearest_neighbors_size;
          neighbor++) {
       int neighbor_index =
-          m_lattice.sites()[site_index].neighbors[neighbor].index;
+          m_lattice.site(site_index).neighbors[neighbor].index;
       for (int orbital_index = 0; orbital_index < m_lattice.orbitals();
            orbital_index++) {
         h(site_index * m_lattice.orbitals() + orbital_index,
