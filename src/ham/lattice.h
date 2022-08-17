@@ -48,8 +48,7 @@ class GrapheneLattice {
   Boundary boundary() const { return m_boundary; }
   const std::vector<Site>& sites() const { return m_sites; }
 
-  Site site(int i) const {
-    assert(i >= 0 && i < static_cast<int>(m_sites.size()));
+  Site site(std::size_t i) const {
     return m_sites[i];
   }
 
@@ -57,15 +56,19 @@ class GrapheneLattice {
     return m_deltas;
   }
 
-  Vec2<double> delta(int i) const {
-    assert(i >= 0 && i < 2 * nearest_neighbors_size);
+  Vec2<double> delta(std::size_t i) const {
     return m_deltas[i];
   }
 
   int site_count() const { return m_nx * m_ny; }
+
   int orbital_count() const { return m_nx * m_ny * m_orbitals; }
 
   Matrix<int> adjacency_matrix() const;
+
+  Matrix<double> position_operator_x() const;
+
+  Matrix<double> position_operator_y() const;
 
  private:
   bool is_inside_graph(int x, int y) const;

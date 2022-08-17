@@ -119,6 +119,36 @@ void GrapheneLattice::compute_graph() {
   }
 }
 
+Matrix<double> GrapheneLattice::position_operator_x() const {
+  Matrix<double> X(this->orbital_count(), this->orbital_count());
+
+  for (int site_index = 0; site_index < this->site_count(); site_index++) {
+    for (int orbital_index = 0; orbital_index < this->orbitals();
+         orbital_index++) {
+      X(site_index * this->orbitals() + orbital_index,
+        site_index * this->orbitals() + orbital_index) =
+          site(site_index).position.x;
+    }
+  }
+
+  return X;
+}
+
+Matrix<double> GrapheneLattice::position_operator_y() const {
+  Matrix<double> Y(this->orbital_count(), this->orbital_count());
+
+  for (int site_index = 0; site_index < this->site_count(); site_index++) {
+    for (int orbital_index = 0; orbital_index < this->orbitals();
+         orbital_index++) {
+      Y(site_index * this->orbitals() + orbital_index,
+        site_index * this->orbitals() + orbital_index) =
+          site(site_index).position.y;
+    }
+  }
+
+  return Y;
+}
+
 Matrix<double> GrapheneTightbinding::realspace_hamiltonian() const {
   Matrix<double> h(this->size(), this->size());
 
