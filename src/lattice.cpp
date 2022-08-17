@@ -175,7 +175,7 @@ Matrix<double> GrapheneTightbinding::realspace_hamiltonian() const {
 Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian_base(
     Vec2d k, FactorFn factor) const {
   // We can only perform this operation when we have closed periodic boundary
-  // conditions, otherwise we cannot use Bloch theorem a justify using
+  // conditions, otherwise we cannot use Bloch theorem to justify using
   // tightbinding.
   assert(m_lattice.boundary() == GrapheneLattice::Boundary::Closed);
 
