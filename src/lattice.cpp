@@ -11,7 +11,7 @@ static int modulo(int a, int b) { return (a % b + b) % b; }
 
 static constexpr Complex COMPI = Complex{0.0, 1.0};
 
-bool GrapheneLattice::is_inside_graph(int x, int y) const {
+bool Lattice::is_inside_graph(int x, int y) const {
   switch (m_boundary) {
     case Boundary::Open:
       return (x >= 0 && x < m_nx) && (y >= 0 && y < m_ny);
@@ -26,34 +26,11 @@ bool GrapheneLattice::is_inside_graph(int x, int y) const {
   }
 }
 
-GrapheneLattice::GrapheneLattice(int nx, int ny)
-    : m_nx(nx * unitcell_size),
-      m_ny(ny),
-      m_orbitals(1),
-      m_boundary(Boundary::Closed) {
-  // Nearest-neighbors vectors for honeycomb lattice with 4-sites in the
-  // unitcell
-  m_deltas = {
-      Vec2d{0.5, 0.5 * std::sqrt(3.0)},
-      Vec2d{0.5, -0.5 * std::sqrt(3.0)},
-      Vec2d{-1.0, 0.0},
-      Vec2d{1.0, 0.0},
-      Vec2d{-0.5, 0.5 * std::sqrt(3.0)},
-      Vec2d{-0.5, -0.5 * std::sqrt(3.0)},
-  };
-
-  // Total number of sites
-  m_sites.resize(m_nx * m_ny);
-
-  // Finally compute the graph
-  this->compute_graph();
-}
-
-Matrix<int> GrapheneLattice::adjacency_matrix() const {
+Matrix<int> Lattice::adjacency_matrix() const {
   Matrix<int> adj(this->orbital_count(), this->orbital_count());
 
   for (int site_index = 0; site_index < this->site_count(); site_index++) {
-    for (int neighbor = 0; neighbor < nearest_neighbors_size; neighbor++) {
+    for (int neighbor = 0; neighbor < nearest_neighbors_size(); neighbor++) {
       int neighbor_index = m_sites[site_index].neighbors[neighbor].index;
       for (int orbital_index = 0; orbital_index < m_orbitals; orbital_index++) {
         adj(site_index * m_orbitals + orbital_index,
@@ -65,60 +42,33 @@ Matrix<int> GrapheneLattice::adjacency_matrix() const {
   return adj;
 }
 
-void GrapheneLattice::compute_graph() {
-  // this computes the graph of honeycomb (i.e. graphene-like) lattice. we
-  // divide the 4-site unitcell in A,B,C,D. each "site kind" defines three
-  // different edges. we treat edges in two ways: graph_walk is the
-  // coordinatized walk on the graph, it means that for a site of kind K its
-  // neighboring edges are defined in a grid. deltas_for_walk is the actual
-  // physical walk where this edge is defined. graph_walk is useful for
-  // defining relations between sites on the lattice while deltas_for_walk for
-  // actual physical calculations afterwards, e.g. fourier transforms.
-
-  // first we calculate the nearest-neighbors. i think we can calculate this
-  // values, don't need to hardcode it
-  constexpr int graph_walk[unitcell_size][nearest_neighbors_size][2] = {
-      {{1, 0}, {1, -1}, {-1, 0}},
-      {{1, 0}, {-1, 1}, {-1, 0}},
-      {{1, 1}, {1, 0}, {-1, 0}},
-      {{1, 0}, {-1, 0}, {-1, -1}}};
-
-  // here we need to make a correction because sites A and C have three
-  // hoppings that are opposite from the sites B and D.
-  constexpr int deltas_for_walk[unitcell_size][nearest_neighbors_size] = {
-      {0, 1, 2}, {3, 4, 5}, {0, 1, 2}, {3, 4, 5}};
-
-  // position_walk is an auxilary array used to calculate where the next
-  // site will be placed on.
-  constexpr int position_walk[unitcell_size] = {0, 3, 1, 3};
-
+void Lattice::compute_graph() {
   for (int j = 0; j < m_ny; j++) {
-    // Start from the left-most site
-    Vec2d current_position{0.0, static_cast<double>(j) * std::sqrt(3.0)};
+    Vec2d current_position = static_cast<double>(j) * lattice_vector_2();
 
     for (int i = 0; i < m_nx; i++) {
       int index = j * m_nx + i;
-      int kind = index % unitcell_size;
+      int kind = index % unitcell_size();
 
       m_sites[index].position = current_position;
-      current_position = current_position + m_deltas[position_walk[kind]];
+      current_position = current_position + delta(position_walk(kind));
 
-      for (int neighbor = 0; neighbor < nearest_neighbors_size; neighbor++) {
-        int dx = graph_walk[kind][neighbor][0];
-        int dy = graph_walk[kind][neighbor][1];
+      for (int neighbor = 0; neighbor < nearest_neighbors_size(); neighbor++) {
+        int dx = graph_walk(kind, neighbor, 0);
+        int dy = graph_walk(kind, neighbor, 1);
 
         if (is_inside_graph(i + dx, j + dy)) {
           int neighbor_index =
               modulo(j + dy, m_ny) * m_nx + modulo(i + dx, m_nx);
           m_sites[index].neighbors.emplace_back(
-              neighbor_index, deltas_for_walk[kind][neighbor]);
+              neighbor_index, deltas_for_walk(kind, neighbor));
         }
       }
     }
   }
 }
 
-Matrix<double> GrapheneLattice::position_operator_x() const {
+Matrix<double> Lattice::position_operator_x() const {
   Matrix<double> X(this->orbital_count(), this->orbital_count());
 
   for (int site_index = 0; site_index < this->site_count(); site_index++) {
@@ -133,7 +83,7 @@ Matrix<double> GrapheneLattice::position_operator_x() const {
   return X;
 }
 
-Matrix<double> GrapheneLattice::position_operator_y() const {
+Matrix<double> Lattice::position_operator_y() const {
   Matrix<double> Y(this->orbital_count(), this->orbital_count());
 
   for (int site_index = 0; site_index < this->site_count(); site_index++) {
@@ -156,7 +106,7 @@ Matrix<double> GrapheneTightbinding::realspace_hamiltonian() const {
   // 2) For multiple orbitals we need to pad the entries.
 
   for (int site_index = 0; site_index < m_lattice.site_count(); site_index++) {
-    for (int neighbor = 0; neighbor < m_lattice.nearest_neighbors_size;
+    for (int neighbor = 0; neighbor < m_lattice.nearest_neighbors_size();
          neighbor++) {
       int neighbor_index = m_lattice.site(site_index).neighbors[neighbor].index;
       for (int orbital_index = 0; orbital_index < m_lattice.orbitals();
@@ -175,7 +125,7 @@ Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian_base(
   // We can only perform this operation when we have closed periodic boundary
   // conditions, otherwise we cannot use Bloch theorem to justify using
   // tightbinding.
-  assert(m_lattice.boundary() == GrapheneLattice::Boundary::Closed);
+  assert(m_lattice.boundary() == Boundary::Closed);
 
   Matrix<Complex> h(this->size(), this->size());
 
@@ -191,7 +141,7 @@ Matrix<Complex> GrapheneTightbinding::momentum_hamiltonian_base(
   // models the hamiltonian.
 
   for (int site_index = 0; site_index < m_lattice.site_count(); site_index++) {
-    for (int neighbor = 0; neighbor < m_lattice.nearest_neighbors_size;
+    for (int neighbor = 0; neighbor < m_lattice.nearest_neighbors_size();
          neighbor++) {
       Edge neighbor_edge = m_lattice.site(site_index).neighbors[neighbor];
       Vec2d delta = m_lattice.delta(neighbor_edge.direction);
