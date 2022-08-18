@@ -2,6 +2,7 @@
 #include <ham/geometry.h>
 #include <ham/lattice.h>
 #include <ham/tightbinding.h>
+#include <ham/types.h>
 
 #include <algorithm>
 #include <iostream>
@@ -12,13 +13,13 @@ template <class LatticeKind>
 void print_bandstructure(const Tightbinding<LatticeKind>& tb) {
   double pi = std::numbers::pi;
   double xfactor = (static_cast<double>(tb.lattice().nx()) / 4.0) * 3.0;
-  double yfactor = static_cast<double>(tb.lattice().ny()) * std::numbers::sqrt3);
+  double yfactor = static_cast<double>(tb.lattice().ny()) * std::numbers::sqrt3;
   RectangleGrid grid(-pi / xfactor, pi / xfactor, -pi / yfactor, pi / yfactor);
 
   for (std::size_t i = 0; i < grid.size(); i++) {
     for (std::size_t j = 0; j < grid.size(); j++) {
-      Vec2<double> k = grid(i, j);
-      Matrix<std::complex<double>> h = tb.momentum_hamiltonian(k);
+      Vec2d k = grid(i, j);
+      Matrix<Complex> h = tb.momentum_hamiltonian(k);
       Eigensystem s(h);
 
       std::cout << k.x << " " << k.y << " ";
