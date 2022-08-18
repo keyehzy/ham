@@ -9,6 +9,7 @@
 #include <cmath>
 #include <complex>
 #include <vector>
+#include <numbers>
 
 // Edge represent a "hop" between two sites in the graph. We store the index
 // where the site lands and the direction used. direction is a index for looking
@@ -140,7 +141,7 @@ class GrapheneLattice final : public Lattice {
   // unitcell. The first three are the usual delta_1, delta_2, delta_3 and
   // following it we have -delta_3, -delta_2, -delta_2 i.e the negative in the
   // opposite order.
-  static constexpr double sqrt3 = 1.73205080756887729352;
+  static constexpr double sqrt3 = std::numbers::sqrt3;
   static constexpr std::array<Vec2d, 2 * s_nearest_neighbors_size> s_deltas = {
         Vec2d{0.5, 0.5 * sqrt3},
         Vec2d{0.5, -0.5 * sqrt3},
