@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 template <class T>
 struct Vec2 {
   T x;
@@ -9,6 +11,7 @@ struct Vec2 {
   Vec2<T> operator-(const Vec2<T>& v) const;
   Vec2<T> operator*(T value) const;
   T dot(const Vec2<T>& v) const;
+  T norm() const;
 };
 
 template <class T>
@@ -29,6 +32,11 @@ inline T Vec2<T>::dot(const Vec2<T>& v) const {
 template <class T>
 inline Vec2<T> Vec2<T>::operator*(T value) const {
   return Vec2<T>{value * x, value * y};
+}
+
+template <class T>
+inline T Vec2<T>::norm() const {
+  return std::sqrt(x*x + y*y);
 }
 
 template <class T>
