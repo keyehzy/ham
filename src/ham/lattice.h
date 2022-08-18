@@ -37,8 +37,16 @@ enum class Boundary {
 
 class Lattice {
  public:
-  explicit Lattice(int nx, int ny)
-      : m_nx(nx), m_ny(ny), m_orbitals(1), m_boundary(Boundary::Closed) {}
+  explicit Lattice(int nx, int ny, int unitcell_size,
+                   int nearest_neighbors_size, int orbitals = 1,
+                   Boundary boundary = Boundary::Closed)
+      : m_nx(nx),
+        m_ny(ny),
+        m_unitcell_size(unitcell_size),
+        m_nearest_neighbors_size(nearest_neighbors_size),
+        m_orbitals(orbitals),
+        m_boundary(boundary),
+        m_sites(nx * ny) {}
 
   int nx() const { return m_nx; }
   int ny() const { return m_ny; }
@@ -52,15 +60,15 @@ class Lattice {
 
   int orbital_count() const { return m_nx * m_ny * m_orbitals; }
 
+  int unitcell_size() const { return m_unitcell_size; }
+
+  int nearest_neighbors_size() const { return m_nearest_neighbors_size; }
+
   Matrix<int> adjacency_matrix() const;
 
   Matrix<double> position_operator_x() const;
 
   Matrix<double> position_operator_y() const;
-
-  virtual int unitcell_size() const = 0;
-
-  virtual int nearest_neighbors_size() const = 0;
 
   virtual Vec2d delta(std::size_t i) const = 0;
 
@@ -82,6 +90,8 @@ class Lattice {
 
   int m_nx;
   int m_ny;
+  int m_unitcell_size;
+  int m_nearest_neighbors_size;
   int m_orbitals;
   Boundary m_boundary;
   std::vector<Site> m_sites;
@@ -150,18 +160,10 @@ class GrapheneLattice final : public Lattice {
   // clang-format on
 
  public:
-  explicit GrapheneLattice(int nx, int ny) : Lattice(nx * s_unitcell_size, ny) {
-    // Total number of sites
-    m_sites.resize(m_nx * m_ny);
-
-    // Finally compute the graph
+  explicit GrapheneLattice(int nx, int ny)
+      : Lattice(nx * s_unitcell_size, ny, s_unitcell_size,
+                s_nearest_neighbors_size) {
     this->compute_graph();
-  }
-
-  int unitcell_size() const override { return s_unitcell_size; }
-
-  int nearest_neighbors_size() const override {
-    return s_nearest_neighbors_size;
   }
 
   Vec2d delta(std::size_t i) const override { return s_deltas[i]; }
