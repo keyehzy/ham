@@ -12,6 +12,8 @@ class Eigensystem {
  public:
   Eigensystem(const Matrix<Complex>& m);
 
+  const std::vector<double>& eigenvalues() const { return m_eigenvalues; }
+
   double eigenvalue(std::size_t i) const { return m_eigenvalues[i]; }
 
   Vector<Complex> eigenvector(std::size_t i) const {

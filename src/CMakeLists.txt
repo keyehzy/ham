@@ -22,6 +22,7 @@ add_library(
   ham/vec.h
   ham/vector.h
   ham/geometry.h
+  ham/tightbinding.h
 )
 
 target_include_directories(ham-lib PUBLIC .)

@@ -1,38 +1,38 @@
 #include <ham/eigensystem.h>
+#include <ham/geometry.h>
 #include <ham/lattice.h>
+#include <ham/tightbinding.h>
 
+#include <algorithm>
 #include <iostream>
-#include "ham/geometry.h"
+#include <iterator>
+#include <numbers>
 
-void print_bandstructure(const GrapheneTightbinding& tb) {
-  int px = 25, py = 25;
-  for (int i = 0; i < px; i++) {
-    double x =
-      -M_PI +
-      2.0 * M_PI * (static_cast<double>(i) / static_cast<double>(px-1));
-    for (int j = 0; j < py; j++) {
-      double y =
-        -M_PI + 2.0 * M_PI *
-        (static_cast<double>(j) / static_cast<double>(py-1));
+template <class LatticeKind>
+void print_bandstructure(const Tightbinding<LatticeKind>& tb) {
+  double pi = std::numbers::pi;
+  double xfactor = (static_cast<double>(tb.lattice().nx()) / 4.0) * 3.0;
+  double yfactor = static_cast<double>(tb.lattice().ny()) * std::sqrt(3.0);
+  RectangleGrid grid(-pi / xfactor, pi / xfactor, -pi / yfactor, pi / yfactor);
 
-      Vec2<double> k{x, y};
+  for (std::size_t i = 0; i < grid.size(); i++) {
+    for (std::size_t j = 0; j < grid.size(); j++) {
+      Vec2<double> k = grid(i, j);
       Matrix<std::complex<double>> h = tb.momentum_hamiltonian(k);
       Eigensystem s(h);
 
       std::cout << k.x << " " << k.y << " ";
-      for (std::size_t i = 0; i < s.size(); i++) {
-        std::cout << s.eigenvalue(i) << " ";
-      }
+      std::copy(s.eigenvalues().begin(), s.eigenvalues().end(),
+                std::ostream_iterator<double>(std::cout, " "));
       std::cout << '\n';
     }
   }
-
 }
 
 int main(int argc, char** argv) {
-  // TightBindingParameters p;
-  // GrapheneTightbinding tb(1, 1, p);
-  // print_bandstructure(tb);
+  TightBindingParameters p;
+  Tightbinding<GrapheneLattice> tb(2, 2, p);
+  print_bandstructure(tb);
 
   // GrapheneLattice gl(1, 1);
   // Matrix<double> X = gl.position_operator_x();

@@ -8,7 +8,6 @@
 #include <cassert>
 #include <cmath>
 #include <complex>
-#include <functional>
 #include <vector>
 
 // Edge represent a "hop" between two sites in the graph. We store the index
@@ -188,31 +187,56 @@ class GrapheneLattice final : public Lattice {
   }
 };
 
-struct TightBindingParameters {
-  double t = 1.0;
-};
+class SquareLattice final : public Lattice {
+ private:
+  static constexpr int s_unitcell_size = 1;
+  static constexpr int s_nearest_neighbors_size = 4;
 
-class GrapheneTightbinding {
+  // clang-format off
+  static constexpr int s_graph_walk[s_unitcell_size][s_nearest_neighbors_size][2] =
+      {{{1, 0}, {0, 1}, {-1, 0}, {0, -1}}};
+
+  static constexpr int
+      s_deltas_for_walk[s_unitcell_size][s_nearest_neighbors_size] = {
+          {0, 1, 2, 3}};
+  // clang-format on
+
+  static constexpr int s_position_walk[s_unitcell_size] = {0};
+  static constexpr std::array<Vec2d, s_nearest_neighbors_size> s_deltas = {
+      Vec2d{1.0, 0.0},
+      Vec2d{0.0, 1.0},
+      Vec2d{-1.0, 0.0},
+      Vec2d{0.0, -1.0},
+  };
+
+  static constexpr Vec2d s_lattice_vector_1 = Vec2d{1.0, 0.0};
+  static constexpr Vec2d s_lattice_vector_2 = Vec2d{0.0, 1.0};
+
  public:
-  explicit GrapheneTightbinding(int nx, int ny,
-                                TightBindingParameters parameters)
-      : m_lattice(GrapheneLattice(nx, ny)), m_parameters(parameters){};
+  explicit SquareLattice(int nx, int ny)
+      : Lattice(nx * s_unitcell_size, ny, s_unitcell_size,
+                s_nearest_neighbors_size) {
+    this->compute_graph();
+  }
 
-  Matrix<double> realspace_hamiltonian() const;
+  Vec2d delta(std::size_t i) const override { return s_deltas[i]; }
 
-  using FactorFn = std::function<Complex(Vec2d, Vec2d)>;
+  virtual Vec2d lattice_vector_1() const override { return s_lattice_vector_1; }
 
-  Matrix<Complex> momentum_hamiltonian_base(Vec2d k, FactorFn factor) const;
-
-  Matrix<Complex> momentum_hamiltonian(Vec2d k) const;
-
-  Matrix<Complex> momentum_hamiltonian_x_derivative(Vec2d k) const;
-
-  Matrix<Complex> momentum_hamiltonian_y_derivative(Vec2d k) const;
-
-  int size() const { return m_lattice.orbital_count(); }
+  virtual Vec2d lattice_vector_2() const override { return s_lattice_vector_2; }
 
  private:
-  GrapheneLattice m_lattice;
-  TightBindingParameters m_parameters;
+  int graph_walk(int cell_offset, int nearest_neighbor_index,
+                 int dir) const override {
+    return s_graph_walk[cell_offset][nearest_neighbor_index][dir];
+  }
+
+  int deltas_for_walk(int cell_offset,
+                      int nearest_neighbor_index) const override {
+    return s_deltas_for_walk[cell_offset][nearest_neighbor_index];
+  }
+
+  int position_walk(int cell_offset) const override {
+    return s_position_walk[cell_offset];
+  }
 };
