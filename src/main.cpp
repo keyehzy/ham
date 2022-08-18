@@ -12,8 +12,11 @@
 template <class LatticeKind>
 void print_bandstructure(const Tightbinding<LatticeKind>& tb) {
   double pi = std::numbers::pi;
-  double xfactor = (static_cast<double>(tb.lattice().nx()) / 4.0) * 3.0;
-  double yfactor = static_cast<double>(tb.lattice().ny()) * std::numbers::sqrt3;
+  double xfactor = (static_cast<double>(tb.lattice().nx()) /
+                    static_cast<double>(tb.lattice().unitcell_size())) *
+                   tb.lattice().lattice_vector_1().norm();
+  double yfactor = static_cast<double>(tb.lattice().ny()) *
+                   tb.lattice().lattice_vector_2().norm();
   RectangleGrid grid(-pi / xfactor, pi / xfactor, -pi / yfactor, pi / yfactor);
 
   for (std::size_t i = 0; i < grid.size(); i++) {
