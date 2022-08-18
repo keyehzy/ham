@@ -5,6 +5,8 @@
 
 #include <functional>
 
+using namespace std::complex_literals;
+
 struct TightBindingParameters {
   double t = 1.0;
 };
@@ -96,13 +98,11 @@ Matrix<Complex> Tightbinding<LatticeKind>::momentum_hamiltonian_base(
   return h;
 }
 
-static constexpr Complex COMPI = Complex{0.0, 1.0};
-
 template <class LatticeKind>
 Matrix<Complex> Tightbinding<LatticeKind>::momentum_hamiltonian(Vec2d k) const {
   return this->momentum_hamiltonian_base(k, [](Vec2d k, Vec2d delta) {
     double phase = k.dot(delta);
-    return std::exp(-COMPI * phase);
+    return std::exp(-1.0i * phase);
   });
 }
 
@@ -111,7 +111,7 @@ Matrix<Complex> Tightbinding<LatticeKind>::momentum_hamiltonian_x_derivative(
     Vec2d k) const {
   return this->momentum_hamiltonian_base(k, [](Vec2d k, Vec2d delta) {
     double phase = k.dot(delta);
-    return (-COMPI * delta.x) * std::exp(-COMPI * phase);
+    return (-1.0i * delta.x) * std::exp(-1.0i * phase);
   });
 }
 
@@ -120,6 +120,6 @@ Matrix<Complex> Tightbinding<LatticeKind>::momentum_hamiltonian_y_derivative(
     Vec2d k) const {
   return this->momentum_hamiltonian_base(k, [](Vec2d k, Vec2d delta) {
     double phase = k.dot(delta);
-    return (-COMPI * delta.y) * std::exp(-COMPI * phase);
+    return (-1.0i * delta.y) * std::exp(-1.0i * phase);
   });
 }

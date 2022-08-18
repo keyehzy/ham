@@ -8,8 +8,8 @@
 #include <cassert>
 #include <cmath>
 #include <complex>
-#include <vector>
 #include <numbers>
+#include <vector>
 
 // Edge represent a "hop" between two sites in the graph. We store the index
 // where the site lands and the direction used. direction is a index for looking
