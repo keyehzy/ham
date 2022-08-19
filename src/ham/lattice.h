@@ -38,8 +38,7 @@ enum class Boundary {
 class Lattice {
  public:
   explicit Lattice(int nx, int ny, int unitcell_size,
-                   int nearest_neighbors_size, int orbitals = 1,
-                   Boundary boundary = Boundary::Closed)
+                   int nearest_neighbors_size, int orbitals, Boundary boundary)
       : m_nx(nx),
         m_ny(ny),
         m_unitcell_size(unitcell_size),
@@ -160,9 +159,10 @@ class GrapheneLattice final : public Lattice {
   // clang-format on
 
  public:
-  explicit GrapheneLattice(int nx, int ny)
+  explicit GrapheneLattice(int nx, int ny, int orbitals = 1,
+                           Boundary boundary = Boundary::Closed)
       : Lattice(nx * s_unitcell_size, ny, s_unitcell_size,
-                s_nearest_neighbors_size) {
+                s_nearest_neighbors_size, orbitals, boundary) {
     this->compute_graph();
   }
 
@@ -214,9 +214,10 @@ class SquareLattice final : public Lattice {
   static constexpr Vec2d s_lattice_vector_2 = Vec2d{0.0, 1.0};
 
  public:
-  explicit SquareLattice(int nx, int ny)
+  explicit SquareLattice(int nx, int ny, int orbitals = 1,
+                         Boundary boundary = Boundary::Closed)
       : Lattice(nx * s_unitcell_size, ny, s_unitcell_size,
-                s_nearest_neighbors_size) {
+                s_nearest_neighbors_size, orbitals, boundary) {
     this->compute_graph();
   }
 

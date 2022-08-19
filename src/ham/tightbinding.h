@@ -17,6 +17,10 @@ class Tightbinding {
   explicit Tightbinding(int nx, int ny, TightBindingParameters parameters)
       : m_lattice(LatticeKind(nx, ny)), m_parameters(parameters){};
 
+  explicit Tightbinding(const LatticeKind& lattice,
+                        TightBindingParameters parameters)
+      : m_lattice(lattice), m_parameters(parameters){};
+
   const LatticeKind& lattice() const { return m_lattice; }
 
   Matrix<double> realspace_hamiltonian() const;
