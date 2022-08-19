@@ -30,7 +30,7 @@ void print_bandstructure(const Tightbinding<LatticeKind>& tb) {
 
 int main(int argc, char** argv) {
   TightBindingParameters p;
-  Tightbinding<GrapheneLattice> tb(1, 1, p);
+  Tightbinding<GrapheneLattice> tb(2, 2, p);
   // print_bandstructure(tb);
 
   DOS<GrapheneLattice> dos(tb, -3.5, 3.5);

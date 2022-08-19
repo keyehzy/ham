@@ -23,6 +23,8 @@ add_library(
   ham/vector.h
   ham/geometry.h
   ham/tightbinding.h
+  ham/dos.h
+  ham/brillouin_zone.h
 )
 
 target_include_directories(ham-lib PUBLIC .)
