@@ -10,20 +10,32 @@ std::vector<double> linspace(double start, double stop, int num = 50);
 
 class RectangleGrid {
  public:
-  RectangleGrid(double width, double height, Vec2d origin = Vec2d{0, 0})
-      : m_width(width), m_height(height), m_origin(origin), m_size(50) {
+
+  RectangleGrid() {};
+
+  explicit RectangleGrid(double width, double height, Vec2d origin = Vec2d{0, 0}, int size = 50)
+      : m_width(width), m_height(height), m_origin(origin), m_size(size) {
     m_xs = linspace(m_origin.x, m_origin.x + m_width, m_size);
     m_ys = linspace(m_origin.y, m_origin.y + m_height, m_size);
   };
 
-  RectangleGrid(double start_x, double end_x, double start_y, double end_y)
+  explicit RectangleGrid(double start_x, double end_x, double start_y, double end_y, int size = 50)
       : m_width(end_x - start_x),
         m_height(end_y - start_y),
         m_origin(Vec2d{start_x, start_y}),
-        m_size(50) {
+        m_size(size) {
     m_xs = linspace(m_origin.x, m_origin.x + m_width, m_size);
     m_ys = linspace(m_origin.y, m_origin.y + m_height, m_size);
   };
+
+  void initialize(double start_x, double end_x, double start_y, double end_y, int size = 50) {
+    m_width = end_x - start_x;
+    m_height = end_y - start_y;
+    m_origin = Vec2d{start_x, start_y};
+    m_size = size;
+    m_xs = linspace(m_origin.x, m_origin.x + m_width, m_size);
+    m_ys = linspace(m_origin.y, m_origin.y + m_height, m_size);
+  }
 
   Vec2d operator()(std::size_t i, std::size_t j) const {
     return Vec2d{m_xs[i], m_ys[j]};

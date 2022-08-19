@@ -1,8 +1,9 @@
 #include <ham/eigensystem.h>
-#include <ham/geometry.h>
 #include <ham/lattice.h>
 #include <ham/tightbinding.h>
 #include <ham/types.h>
+#include <ham/dos.h>
+#include <ham/brillouin_zone.h>
 
 #include <algorithm>
 #include <iostream>
@@ -11,17 +12,11 @@
 
 template <class LatticeKind>
 void print_bandstructure(const Tightbinding<LatticeKind>& tb) {
-  double pi = std::numbers::pi;
-  double xfactor = (static_cast<double>(tb.lattice().nx()) /
-                    static_cast<double>(tb.lattice().unitcell_size())) *
-                   tb.lattice().lattice_vector_1().norm();
-  double yfactor = static_cast<double>(tb.lattice().ny()) *
-                   tb.lattice().lattice_vector_2().norm();
-  RectangleGrid grid(-pi / xfactor, pi / xfactor, -pi / yfactor, pi / yfactor);
+  BrillouinZone<LatticeKind> BZ(tb.lattice());
 
-  for (std::size_t i = 0; i < grid.size(); i++) {
-    for (std::size_t j = 0; j < grid.size(); j++) {
-      Vec2d k = grid(i, j);
+  for (std::size_t i = 0; i < BZ.size(); i++) {
+    for (std::size_t j = 0; j < BZ.size(); j++) {
+      Vec2d k = BZ(i, j);
       Matrix<Complex> h = tb.momentum_hamiltonian(k);
       Eigensystem s(h);
 
@@ -35,9 +30,15 @@ void print_bandstructure(const Tightbinding<LatticeKind>& tb) {
 
 int main(int argc, char** argv) {
   TightBindingParameters p;
-  Tightbinding<GrapheneLattice> tb(2, 2, p);
-  print_bandstructure(tb);
+  Tightbinding<GrapheneLattice> tb(1, 1, p);
+  // print_bandstructure(tb);
 
+  DOS<GrapheneLattice> dos(tb, -3.5, 3.5);
+
+  for (std::size_t i = 0; i < dos.size(); i++) {
+    std::cout << dos.omega(i) << " " << dos(i) << std::endl;
+  }
+  
   // GrapheneLattice gl(1, 1);
   // Matrix<double> X = gl.position_operator_x();
   // Matrix<double> Y = gl.position_operator_y();
